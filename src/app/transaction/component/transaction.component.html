@@ -1,0 +1,96 @@
+<nav class="navbar navbar-light bg-white shadow-sm py-2">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img
+        src="/images/yavar-logo-black.png"
+        alt="Yavar logo"
+        style="max-height: 50px"
+      />
+    </a>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div class="text-center">
+    <h2 class="text-primary fw-bold">Transaction Processor Agent</h2>
+    <p class="text-muted">Extract & categorize transactions with AI</p>
+  </div>
+
+  <form (ngSubmit)="onSubmit()">
+    <!-- AI Model Selection -->
+    <div class="mt-4">
+      <label class="fw-medium">Select AI Model</label>
+      <div class="d-flex gap-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="aiModel"
+            id="Gemini"
+            value="Gemini"
+            [(ngModel)]="selectedModel"
+          />
+          <label class="form-check-label" for="Gemini">Gemini</label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="aiModel"
+            id="DeepSeek"
+            value="DeepSeek"
+            [(ngModel)]="selectedModel"
+          />
+          <label class="form-check-label" for="DeepSeek">DeepSeek</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Key -->
+    <div class="mt-4">
+      <label for="api-key" class="form-label fw-medium">Enter API Key</label>
+      <input
+        type="password"
+        id="api-key"
+        class="form-control"
+        [(ngModel)]="apiKey"
+        name="apiKey"
+        placeholder="Enter API Key"
+      />
+    </div>
+
+    <!-- File Upload: Transaction Statement -->
+    <div class="mt-4">
+      <label for="statement" class="form-label fw-medium"
+        >Upload a Transaction Statement (PDF)</label
+      >
+      <input
+        class="form-control"
+        id="statement"
+        type="file"
+        accept=".pdf"
+        (change)="onFileChange($event, 'transaction')"
+      />
+    </div>
+
+    <!-- File Upload: Vendor List -->
+    <div class="mt-4">
+      <label for="vendor-list" class="form-label fw-medium"
+        >Upload a Vendor List (CSV or Excel)</label
+      >
+      <input
+        class="form-control"
+        id="vendor-list"
+        type="file"
+        accept=".csv, .xlsx, .xls"
+        (change)="onFileChange($event, 'vendor')"
+      />
+    </div>
+
+    <div class="text-center mt-5">
+      <button type="submit" class="btn btn-primary px-4 py-2">
+        Process Transactions
+      </button>
+    </div>
+  </form>
+</div>
