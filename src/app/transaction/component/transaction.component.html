@@ -1,4 +1,5 @@
-<nav class="navbar navbar-light bg-white shadow-sm py-2">
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm py-3 sticky-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img
@@ -6,91 +7,124 @@
         alt="Yavar logo"
         style="max-height: 50px"
       />
+      <span class="ms-2 fw-bold text-primary">Transaction Processor</span>
     </a>
   </div>
 </nav>
 
-<div class="container py-4">
-  <div class="text-center">
+<!-- Main Content -->
+<div class="container py-5">
+  <!-- Header Section -->
+  <div class="text-center mb-5">
     <h2 class="text-primary fw-bold">Transaction Processor Agent</h2>
-    <p class="text-muted">Extract & categorize transactions with AI</p>
+    <p class="text-muted fs-5">Extract & categorize transactions with AI</p>
   </div>
 
-  <form (ngSubmit)="onSubmit()">
-    <!-- AI Model Selection -->
-    <div class="mt-4">
-      <label class="fw-medium">Select AI Model</label>
-      <div class="d-flex gap-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="aiModel"
-            id="Gemini"
-            value="Gemini"
-            [(ngModel)]="selectedModel"
-          />
-          <label class="form-check-label" for="Gemini">Gemini</label>
+  <!-- Card Section -->
+  <div class="card shadow-lg border-0 rounded">
+    <div class="card-body p-4">
+      <form (ngSubmit)="onSubmit()">
+        <!-- AI Model Selection -->
+        <div class="mb-4">
+          <label class="fw-semibold mb-2">Select AI Model</label>
+          <div class="d-flex gap-3 mt-2">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="aiModel"
+                id="Gemini"
+                value="Gemini"
+                [(ngModel)]="selectedModel"
+              />
+              <label class="form-check-label" for="Gemini">Gemini</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="aiModel"
+                id="DeepSeek"
+                value="DeepSeek"
+                [(ngModel)]="selectedModel"
+              />
+              <label class="form-check-label" for="DeepSeek">DeepSeek</label>
+            </div>
+          </div>
         </div>
-        <div class="form-check">
+
+        <!-- API Key -->
+        <div class="mb-4">
+          <label for="api-key" class="form-label fw-semibold mb-2"
+            >API Key</label
+          >
           <input
-            class="form-check-input"
-            type="radio"
-            name="aiModel"
-            id="DeepSeek"
-            value="DeepSeek"
-            [(ngModel)]="selectedModel"
+            type="password"
+            id="api-key"
+            class="form-control rounded-pill px-3 py-2 shadow-sm"
+            [(ngModel)]="apiKey"
+            name="apiKey"
+            placeholder="Enter API Key"
           />
-          <label class="form-check-label" for="DeepSeek">DeepSeek</label>
         </div>
-      </div>
-    </div>
 
-    <!-- API Key -->
-    <div class="mt-4">
-      <label for="api-key" class="form-label fw-medium">Enter API Key</label>
-      <input
-        type="password"
-        id="api-key"
-        class="form-control"
-        [(ngModel)]="apiKey"
-        name="apiKey"
-        placeholder="Enter API Key"
-      />
-    </div>
+        <!-- File Upload: Transaction Statement -->
+        <div class="mb-4">
+          <label for="statement" class="form-label fw-semibold mb-2">
+            Upload Transaction Statement (PDF)
+          </label>
+          <input
+            type="file"
+            id="statement"
+            accept=".pdf"
+            (change)="onFileChange($event, 'transaction')"
+            class="form-control rounded-pill px-3 py-2 shadow-sm"
+            multiple
+          />
+        </div>
 
-    <!-- File Upload: Transaction Statement -->
-    <div class="mt-4">
-      <label for="statement" class="form-label fw-medium"
-        >Upload a Transaction Statement (PDF)</label
-      >
-      <input
-        class="form-control"
-        id="statement"
-        type="file"
-        accept=".pdf"
-        (change)="onFileChange($event, 'transaction')"
-      />
-    </div>
+        <!-- File Upload: Vendor List -->
+        <div class="mb-4">
+          <label for="vendor-list" class="form-label fw-semibold mb-2">
+            Upload Vendor List (CSV or Excel)
+          </label>
+          <input
+            type="file"
+            id="vendor-list"
+            accept=".csv, .xlsx, .xls"
+            (change)="onFileChange($event, 'vendor')"
+            class="form-control rounded-pill px-3 py-2 shadow-sm"
+          />
+        </div>
 
-    <!-- File Upload: Vendor List -->
-    <div class="mt-4">
-      <label for="vendor-list" class="form-label fw-medium"
-        >Upload a Vendor List (CSV or Excel)</label
-      >
-      <input
-        class="form-control"
-        id="vendor-list"
-        type="file"
-        accept=".csv, .xlsx, .xls"
-        (change)="onFileChange($event, 'vendor')"
-      />
+        <!-- Submit Button -->
+        <div class="text-center mt-4">
+          <button
+            type="submit"
+            [disabled]="loading"
+            class="btn btn-primary px-5 py-3 rounded-pill fw-semibold shadow-sm d-flex align-items-center justify-content-center"
+          >
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"
+            ></span>
+            Process Transactions
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <div class="text-center mt-5">
-      <button type="submit" class="btn btn-primary px-4 py-2">
-        Process Transactions
-      </button>
-    </div>
-  </form>
+  <!-- Transaction Table -->
+  <div class="mt-5" *ngIf="transactions?.length">
+    <ag-grid-angular
+      class="ag-theme-alpine shadow-sm rounded border"
+      style="width: 100%; height: 60vh"
+      [rowData]="transactions"
+      [columnDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      (gridReady)="onGridReady($event)"
+    ></ag-grid-angular>
+  </div>
 </div>

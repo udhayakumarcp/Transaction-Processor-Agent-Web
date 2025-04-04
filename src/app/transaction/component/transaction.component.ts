@@ -1,20 +1,42 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TransactionService } from '../transaction.service';
+import { AgGridAngular } from 'ag-grid-angular';
+import type { ColDef, GridReadyEvent } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { TransactionService } from '../service/transaction.service';
+import { Transaction } from '../transcation.types';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 @Component({
   selector: 'app-transaction',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AgGridAngular],
   templateUrl: './transaction.component.html',
   styleUrl: './transaction.component.scss',
 })
 export class TransactionComponent {
+  loading = false;
   selectedModel: string = 'Gemini';
   apiKey: string = '';
-  transactionFile: File | null = null;
+  transactionFile: File[] | null = null;
   vendorFile: File | null = null;
+  transactions: Transaction[] = [];
+
+  // private gridApi: GridApi<any>;
+
+  readonly defaultColDef: ColDef = {
+    flex: 1,
+  };
+
+  readonly colDefs: ColDef<Transaction>[] = [
+    { field: 'Date' },
+    { field: 'Description' },
+    { field: 'Deposits_Credits', headerName: 'Deposits Credits' },
+    { field: 'Withdrawals_Debits', headerName: 'Withdrawals Debits' },
+    { field: 'Vendor Name' },
+  ];
 
   constructor(private transactionService: TransactionService) {}
 
@@ -22,7 +44,7 @@ export class TransactionComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       if (fileType === 'transaction') {
-        this.transactionFile = input.files[0];
+        this.transactionFile = Array.from(input.files);
       } else if (fileType === 'vendor') {
         this.vendorFile = input.files[0];
       }
@@ -31,6 +53,7 @@ export class TransactionComponent {
 
   onSubmit(): void {
     if (this.transactionFile && this.vendorFile) {
+      this.loading = true;
       this.transactionService
         .processTransaction(
           this.apiKey,
@@ -38,10 +61,15 @@ export class TransactionComponent {
           this.transactionFile,
           this.vendorFile,
         )
+        // .getSampleResponse()
         .subscribe({
-          next: () => {},
+          next: (data) => {
+            this.loading = false;
+            this.transactions = data;
+          },
           error: (error) => {
-            console.log('error', error);
+            this.loading = false;
+            console.log('error', error.error);
           },
         });
     }
@@ -52,6 +80,11 @@ export class TransactionComponent {
     // if (this.transactionFile) {
     //   this.parsePDf(this.transactionFile);
     // }
+  }
+
+  onGridReady(event: GridReadyEvent) {
+    console.log(event);
+    // this.gridApi = event.api;
   }
 
   // getVendorList(file: File) {
